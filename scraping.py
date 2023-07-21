@@ -4,16 +4,9 @@ from typing import List
 
 import requests
 from bs4 import BeautifulSoup
-from tinydb import TinyDB, where
-from tinydb.storages import JSONStorage
-from tinydb_serialization import SerializationMiddleware
-from tinydb_serialization.serializers import DateTimeSerializer
+from tinydb import where
 
-serialization = SerializationMiddleware(JSONStorage)
-serialization.register_serializer(DateTimeSerializer(), 'TinyDate')
-
-db = TinyDB("./db.json", storage=serialization)
-tbl_arquivos = db.table('arquivos')
+from db import tbl_arquivos
 
 
 @dataclass
