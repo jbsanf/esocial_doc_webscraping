@@ -4,7 +4,9 @@ from typing import List
 
 import requests
 from bs4 import BeautifulSoup
+from dotenv import load_dotenv
 from tinydb import where
+load_dotenv()
 
 from db import tbl_arquivos
 

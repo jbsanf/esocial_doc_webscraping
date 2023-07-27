@@ -1,0 +1,18 @@
+services:
+  esocial_docs:
+    build:
+      context: 'https://github.com/jbsanf/esocial_doc_webscraping.git'
+      dockerfile: Dockerfile
+      tags:
+        - esocial_docs:latest
+    container_name: esocial_docs
+    environment:
+      - API_TOKEN
+      - DATA_PATH=/data
+    image: esocial_docs:latest
+    volumes:
+      - esocialdocs_data:/data
+
+volumes:
+  esocialdocs_data:
+    name: "esocialdocs_data"
