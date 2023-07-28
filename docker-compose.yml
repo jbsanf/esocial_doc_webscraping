@@ -5,14 +5,39 @@ services:
       dockerfile: Dockerfile
       tags:
         - esocial_docs:latest
-    container_name: esocial_docs
+    container_name: esocial_docs_bot
+    depends_on:
+      - postgres
     environment:
-      - API_TOKEN
-      - DATA_PATH=/data
+      API_TOKEN:
+      POSTGRES_HOST: ${POSTGRES_HOST:-esocial_docs_db}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
     image: esocial_docs:latest
+    networks:
+      - esocialdocs
+    restart: unless-stopped
     volumes:
-      - esocialdocs_data:/data
+      - esocialdocs:/data
+  postgres:
+    container_name: esocial_docs_db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      PGDATA: /data/postgres
+    image: postgres:12.15-alpine3.18
+    networks:
+      - esocialdocs
+    ports:
+      - "15432:5432"
+    restart: unless-stopped
+    volumes:
+       - esocialdocs:/data
+
+networks:
+  esocialdocs:
+    name: esocialdocs
+    driver: bridge
 
 volumes:
-  esocialdocs_data:
-    name: "esocialdocs_data"
+  esocialdocs:
+    name: "esocialdocs"
