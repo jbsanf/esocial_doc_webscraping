@@ -48,4 +48,15 @@ class Arquivo(Model):
         database = pg_db
 
 
+class Inscrito(Model):
+    id = IntegerField(primary_key=True)
+    nome = CharField()
+    ativo = BooleanField(default=False)
+
+
+    class Meta:
+        database = pg_db
+
+
 Arquivo.create_table(safe=True)
+Inscrito.create_table(safe=True)
