@@ -1,13 +1,15 @@
 services:
   esocial_docs:
     build:
-      context: 'https://github.com/jbsanf/esocial_doc_webscraping.git'
+      context: ${COMPOSE_CONTEXT:-https://github.com/jbsanf/esocial_doc_webscraping.git}
       dockerfile: Dockerfile
       tags:
         - esocial_docs:latest
     container_name: esocial_docs_bot
     depends_on:
       - postgres
+    env_file:
+      - .env
     environment:
       API_TOKEN:
       POSTGRES_HOST: ${POSTGRES_HOST:-esocial_docs_db}
@@ -28,7 +30,7 @@ services:
     networks:
       - esocialdocs
     ports:
-      - "15432:5432"
+      - "15432:${POSTGRES_PORT:-5432}"
     restart: unless-stopped
     volumes:
        - esocialdocs:/data
