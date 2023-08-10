@@ -104,4 +104,9 @@ async def saudacao(message: types.Message):
     )
 
 if __name__ == '__main__':
+    import signal
+    def sair_com_seguranca(*args, **kwargs):
+        raise(SystemExit)
+    
+    signal.signal(signal.SIGTERM, sair_com_seguranca)
     executor.start_polling(dp, skip_updates=True)
