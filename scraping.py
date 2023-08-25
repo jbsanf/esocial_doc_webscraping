@@ -1,6 +1,7 @@
+import argparse
 import asyncio
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List
 
 import requests
@@ -38,10 +39,9 @@ async def preparar_notificacao() -> None:
     
     await (await bot.get_session()).close()
 
-def obter_lista() -> List[dict]:
+def obter_lista(dt_ref) -> List[dict]:
     response = requests.get('https://www.gov.br/esocial/pt-br/documentacao-tecnica')
     soup = BeautifulSoup(response.content, features="html.parser")
-    dt_hoje = datetime.now()
     for item in soup.find_all('a'):
         if item['href'].endswith('.pdf'):
             nome = item.text.strip()
@@ -52,24 +52,32 @@ def obter_lista() -> List[dict]:
             yield dict(
                 nome=nome,
                 link=item['href'],
-                data=dt_hoje,
+                data=dt_ref,
                 arquivo=arquivo,
             )
     return []
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-p', '--primeira-execucao', action='store_true', default=False)
+    args = parser.parse_args()
+    if args.primeira_execucao:
+        dt_ref = datetime.now() - timedelta(days=60)
+    else:
+        dt_ref = datetime.now()
+    
     logger.info(f"Iniciando busca por novos arquivos.")
     inscritos: List[Inscrito] = Inscrito.todos_ativos()
 
     # Buscar novidades e gerar notificação
     with pg_db.atomic():
-        for arq in obter_lista():
+        for arq in obter_lista(dt_ref=dt_ref):
             arquivo, criado = Arquivo.get_or_create(
                 arquivo=arq.pop('arquivo'),
                 defaults=arq,
             )
-            if criado:
+            if criado and not args.primeira_execucao:
                 for inscrito in inscritos:
                     Notificar.create(
                         arquivo=arquivo,

@@ -98,11 +98,19 @@ async def sair(message: types.Message):
 async def recentes(message: types.Message):
     dt = datetime.now() - timedelta(days=60)
     arquivos = Arquivo.filter(Arquivo.data>=dt)
+    if arquivos:
+        emoji=emoji_direcao
+        titulo="Aqui está os arquivos encontrados nos últimos 60 dias:"
+        msg = formatar_mensagem(arquivos=arquivos)
+    else:
+        emoji=emoji_erro
+        titulo="Não foram encontrados arquivos novos nos últimos 60 dias."
+        msg = None
     await enviar_mensagem(
         chat_id=message.from_id,
-        emoji=emoji_direcao,
-        titulo="Aqui está os arquivos encontrados nos últimos 60 dias:",
-        texto=formatar_mensagem(arquivos=arquivos),
+        emoji=emoji,
+        titulo=titulo,
+        texto=msg,
     )
 
 @dp.message_handler(commands=['start', 'ajuda'])
