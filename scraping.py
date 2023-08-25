@@ -4,9 +4,10 @@ from typing import List
 import requests
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
+from loguru import logger
 load_dotenv()
 
-from db import Arquivo
+from db import pg_db, Arquivo, Inscrito, Notificar
 
 def obter_lista() -> List[dict]:
     response = requests.get('https://www.gov.br/esocial/pt-br/documentacao-tecnica')
@@ -30,8 +31,18 @@ def obter_lista() -> List[dict]:
 
 
 if __name__ == '__main__':
-    for arq in obter_lista():
-        arquivo, criado = Arquivo.get_or_create(
-            arquivo=arq.pop('arquivo'),
-            defaults=arq,
-        )
+    logger.info(f"Iniciando busca por novos arquivos.")
+    inscritos: List[Inscrito] = Inscrito.todos_ativos()
+    # Buscar novidades e gerar notificação
+    with pg_db.atomic():
+        for arq in obter_lista():
+            arquivo, criado = Arquivo.get_or_create(
+                arquivo=arq.pop('arquivo'),
+                defaults=arq,
+            )
+            if criado:
+                for inscrito in inscritos:
+                    Notificar.create(
+                        arquivo=arquivo,
+                        inscrito=inscrito,
+                    )

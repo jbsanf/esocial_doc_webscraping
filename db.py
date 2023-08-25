@@ -53,6 +53,17 @@ class Inscrito(Model):
     nome = CharField()
     ativo = BooleanField(default=False)
 
+    class Meta:
+        database = pg_db
+    
+    @classmethod
+    def todos_ativos(cls):
+        return cls.filter(cls.ativo==True)
+
+
+class Notificar(Model):
+    arquivo = ForeignKeyField(Arquivo, backref='notificacoes')
+    inscrito = ForeignKeyField(Inscrito, backref='notificacoes')
 
     class Meta:
         database = pg_db
@@ -60,3 +71,4 @@ class Inscrito(Model):
 
 Arquivo.create_table(safe=True)
 Inscrito.create_table(safe=True)
+Notificar.create_table(safe=True)
