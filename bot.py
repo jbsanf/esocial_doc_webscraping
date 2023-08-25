@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import logging
 import os
 from typing import List, Optional
@@ -8,16 +9,19 @@ from dotenv import load_dotenv
 load_dotenv()
 logging.basicConfig(level=logging.INFO)
 
-from db import Inscrito
+from db import Arquivo, Inscrito
+from utils import formatar_mensagem
 
 bot = Bot(token=os.getenv('API_TOKEN'))
 dp = Dispatcher(bot)
 
 emoji_sucesso = '\U0001f44d'
 emoji_erro = '\U000026d4'
+emoji_direcao = '\U0001F502'
 
 comandos = {
     'entrar': 'para se inscrever.',
+    'recentes': 'para listar arquivos recentes.',
     'sair': 'para cancelar a inscrição.',
 }
 
@@ -90,7 +94,18 @@ async def sair(message: types.Message):
             titulo="Incrição cancelada!",
         )
 
-@dp.message_handler(commands=['start', 'help'])
+@dp.message_handler(commands=['recentes'])
+async def recentes(message: types.Message):
+    dt = datetime.now() - timedelta(days=60)
+    arquivos = Arquivo.filter(Arquivo.data>=dt)
+    await enviar_mensagem(
+        chat_id=message.from_id,
+        emoji=emoji_direcao,
+        titulo="Aqui está os arquivos encontrados nos últimos 60 dias:",
+        texto=formatar_mensagem(arquivos=arquivos),
+    )
+
+@dp.message_handler(commands=['start', 'ajuda'])
 async def saudacao(message: types.Message):
     await enviar_mensagem(
         chat_id=message.from_id,
@@ -100,7 +115,7 @@ async def saudacao(message: types.Message):
             "eSocial a procura de novos documentos '.pdf', e notifica "
             "os interessados."
         ),
-        opcoes=['entrar', 'sair']
+        opcoes=['entrar', 'recentes', 'sair']
     )
 
 if __name__ == '__main__':

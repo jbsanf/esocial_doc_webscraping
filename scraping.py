@@ -7,19 +7,16 @@ import requests
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from loguru import logger
+
 load_dotenv()
 
 from bot import bot
 from db import pg_db, Arquivo, Inscrito, Notificar
+from utils import formatar_mensagem
 
 async def enviar_notificacao(inscrito: Inscrito, arquivos: List[Arquivo]) -> None:
     msg = f'{inscrito.nome}, aqui está a lista de novos arquivos que encontrei:\n\n'
-    for arq in arquivos:
-        msg += (
-            f'{(arq.arquivo.nome or arq.arquivo.arquivo).upper()}\n'
-            f'{arq.arquivo.link}'
-            '\n\n'
-        )
+    msg += formatar_mensagem(arquivos=[arq.arquivo for arq in arquivos])
     await bot.send_message(
         chat_id=inscrito.id,
         text=msg,
