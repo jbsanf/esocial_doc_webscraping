@@ -13,7 +13,7 @@ services:
     environment:
       API_TOKEN:
       POSTGRES_HOST: ${POSTGRES_HOST:-esocial_docs_db}
-      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      POSTGRES_PORT: "5432"
     image: esocial_docs:latest
     networks:
       - esocialdocs
@@ -30,7 +30,7 @@ services:
     networks:
       - esocialdocs
     ports:
-      - "${POSTGRES_PORT:-5432}:${POSTGRES_PORT:-5432}"
+      - "${POSTGRES_PORT:-5432}:5432"
     restart: unless-stopped
     volumes:
        - esocialdocs:/var/lib/postgresql/data
